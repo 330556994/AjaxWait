@@ -1,0 +1,233 @@
+﻿<!DOCTYPE html>
+<html ng-app="myapp">
+<head>
+    <meta charset="utf-8">
+    <script src="https://cdn.bootcss.com/angular.js/1.4.6/angular.min.js"></script>
+    <style>
+        .odd {
+            background-color: blue;
+        }
+        .even {
+            background-color: red;
+        } 
+    </style>
+</head>
+<body>
+    <h1>rootScope 中的属性 {{rootValue}}</h1>
+    <!--基础 ng 属性指令   根据HTML的标准定义，布尔属性代表一个 true 或者 false 的值，当这个属性出现的时候，这个属性就是true（无论实际定义的值是什么），如果未出现这个属性就是 false.
+        当使用 AnglarJS 进行动态绑定数据绑定时，不能简单的将属性设置为 true 或 false ,因为根据标准的定义，只有在这个属性没有出现时，它的值才为false.因此 angularJS 提供了一组
+        ng-前缀版本的布尔属性，通过运算表达式的值来决定目标元素是插入合适
+        ng-href；    ng-href 将提供一个超链接，这个超链接将处于禁用状态，指定 ng-href='someExpression' 中的表达式被调用并且返回一个值
+        ng-src；
+        ng-disabled；
+        ng-checked；
+        ng-readonly；
+        ng-selected；
+        ng-class；
+        ng-style。
+
+        使用 ng-disabled 可以将 disable 属性绑定到以下表单输入字段中    
+         <input> （text、checkbox、radio、number、url, email、submit）；
+         <textarea>；
+         <select>；
+         <button>。
+        
+        ng-href 和 ng-src 虽然不是标准的 HTML 布尔属性，但是由于行为相似，在 angularJS 的源码内部是和布尔属性同等对待的，
+        ng-href 和 ng-src 都能有效帮助重构和避免错误， 
+        当使用当前作用域的属性动态创建 url 时，应该用 ng-href 代替 href.
+        当用户点击一个插值动态生成的链接时，如果插值尚未生效，将会跳转到错误的页面 (404 页面)
+        这时，如果使用 ng-href ，AngularJS 会等到插值生效后再执行点击链接的行为。
+        -->
+    <input type="text" ng-model="haveText" />
+    <textarea ng-disabled="!haveText"></textarea><!--当用户输入值时 !haveText 为false 此时移除 disabled 属性，textarea 处于启用状态-->
+    <textarea ng-disabled="isDisabled"></textarea>
+
+    <!-- 使用 ng-checked -->
+    <h1>checkbox中模型变量 isCheck 为: {{ isCheck }}</h1>
+    <input type="checkbox" ng-model="isCheck" ng-init="isCheck = true" ng-checked="isCheck" />
+
+    <!-- 使用 ng-select -->
+    <h1>select 中模型变量 isSelect 值为: {{ isSelect }}</h1>
+    <select ng-model="isSelect" ng-init="isSelect = true">
+        <option value="1">一年级</option>
+        <option value="2">二年级</option>
+        <option value="3" ng-selected="isSelect">三年级</option>
+    </select>
+
+    <!-- 使用 ng-href -->
+    <a ng-href="{{ myhref }}">I'm feeling lucky,When I load</a>
+
+    <!-- AngularJS 会告诉浏览器在 ng-src 对应的表达式生效之前不要加载图像 -->
+    <!--<img src="{{ myImgSrc }}" />
+    <img ng-src="{{ myImgSrc }}" />-->
+
+    <!-- 使用 ng-include -->
+    <div ng-include="'HtmlPage2.html'" 
+         ng-controller="IncludeController" 
+         ng-init="name = 'gongtao'"
+         onload="includeFun()"
+         autoscroll="{{ isautoscroll }}">
+        hello{{ name }}
+    </div>
+
+    <!-- 使用 ng-switch ng-switch 指令根据表达式显示或隐藏对应的部分 -->
+    <input type="text" ng-model="person.name"/>
+    <div ng-switch on="person.name">
+        <!-- 通过使用 ng-switch-default 指令设置默认选项，如果都没有匹配的情况，默认选项会显示 -->
+        <p ng-switch-default>And the winner is</p>  
+        <!-- 对应的子元素通过使用 ng-switch-when 指令，如果匹配选中选择显示，其他为匹配的则移除 -->
+        <h1 ng-switch-when="GongTao">{{ person.name }}</h1>
+    </div>
+
+    <!-- 
+         使用 ng-if 指令 ng-if 可以完全根据表达式的值生成或移除一个DOM元素 如果赋值给 ng-if 表达式的值为 false 则对应的元素将从 DOM 中移除。否则对应元素的一个克隆将被重新插入到DOM中。
+         ng-if 和 ng-show 和 ng-hide 本质上的区别是，它不是通过 CSS 显示或隐藏 DOM 节点，而是真正生成或移除节点
+         当一个元素被 ng-if 从 DOM 中移除，同他关联的作用域也将销毁，而且当它重写加入 DOM 中时，会通过原型继承从它的父作用域生成一个新的作用域
+         同时，使用 ng-if 重新创建元素是使用的是它们编译后的状态，如果 ng-if 内部的代码加载之后被jQuery修改过，那么当ng-if表达式为false时，这个DOM元素会被移除，表达式再次为 true 时，这个元素
+         及其内部子元素会被重新插入 DOM ，此时这些元素的状态将是他们的原始状态，而不是上次移除的状态。
+    -->
+    <div ng-if="1+1===2">
+        <h1>1+1=2? YES!</h1>
+    </div>
+
+    <!-- 
+        ng-repeat 用来遍历一个集合或为集合中的每个元素生成一个模板实例。集合中的每个元素都会被赋予自己的模板和作用域，同时每个模板实例作用域中都会暴露一些特殊的属性。 
+            $index：遍历的进度（0...length-1）。
+            $first：当元素是遍历的第一个时值为true。
+            $middle：当元素处于第一个和最后元素之间时值为true。
+            $last：当元素是遍历的最后一个时值为true。
+            $even：当$index值是偶数时值为true。
+            $odd：当$index值是奇数时值为true。
+    -->
+    <div ng-controller="PeopleController">
+        <li ng-repeat="person in people" ng-class="{true:'even', false: 'ood'}[$index%2==0]">
+            {{ person.name }} lives in {{ person.city }}
+        </li>
+    </div>
+
+    <!--
+        ng-init 指令用来在指令被调用时设置内部作用域的初始状态 
+        ng-init最常见的使用场景是：在类似本节的例子中那样，需要创建小的示例代码的时候。
+        对于任何需要健壮结构的场景，请在控制器中用数据模型对象来设置状态。   
+    -->
+    <div ng-init="city='shanghai';temperature=40">
+        {{city}} 的天气是 {{temperature}}
+    </div>
+
+    <!--
+        {{}} 语法是 AngularJS 内置的模板语法，它会在内部 $scope 和视图之间创建绑定，基于这个绑定，只要 $scope 发生变化，视图就会随之自动更新。
+        事实上，它也是指令，虽然看起来不像，实际上它是 ng-bind 指令的简略形式，用这种形式不需要创建新的元素，因此它经常被用在行内文本中。
+        在屏幕的可视区域内使用{{}}会导致页面加载时未渲染的元素发生闪烁，用 ng-bind 可以避免这个问题。
+    -->
+    <div ng-init="greeting='helloworld'">
+        {{greeting}}
+    </div>
+
+    <!--
+        ng-bind 尽管可以在视图中使用 {{}}(AngularJS 的内置方式)，我们也可以通过 ng-bind 指令实现同样的行为。    
+        HTML 加载含有 {{}} 语法的元素后并不会立刻渲染他们，导致为渲染内容闪烁(flash of unrendered content fouc)。我们可以用 ng-bind 将内容同元素绑定在一起避免FOUC,内容将会被当做子文本节点渲染到含有 ng-bind 指令的元素内
+    -->
+    <div ng-init="greeting='helloworld'">
+        <p ng-bind="greeting"></p>
+    </div>
+    
+    <!--
+        ng-cloak 除了使用 ng-bind 指令避免为渲染元素闪烁，还可以在含有 {{}} 的元素上使用 ng-cloak 指令    
+    -->
+    <div ng-init="greeting='helloworld'">
+        <p ng-cloak>{{ greeting }}</p>
+    </div>
+
+    <!--
+        ng-bind-template  同 ng-bind 指令类似，用于在视图中绑定多个表达式
+    -->
+    <div style="background-color:darkseagreen" ng-bind-template="{{rootValue}} {{isDisabled}}"></div>
+
+    <!--
+        ng-model ng-model 指令用来将 input select textarea 或自定义表单控件同包含它们的作用域中的属性进行绑定，他可以提供并处理表单验证功能，在元素上设置相关的 css 类(ng-valid, ng-invalid等)，并负责在副表单中注册控件
+        我们应该始终用 ngModel 来绑定 $scope 上一个数据模型类的属性，而不是 $scope 上的属性，这可以避免在作用域或后代作用域发生属性覆盖    
+    -->
+    <input type="text" ng-model="modelName.someProperty"/>
+
+    <!--
+        ng-show / ng-hide ng-show 和 ng-hide 根据所给表达式的值来显示或隐藏 HTML 代码。当赋值给 ng-show 指令的值为 false 时元素会被隐藏。类似的，当赋值给 ng-hide 元素为 true 时元素也会被隐藏。
+        元素的显示和隐藏是通过移除或添加 ng-hide 这个 CSS 类实现的。 ng-hide 类被预先定义在了 AngularJS 的 CSS 文件中，并且它的 display 属性的值为 none（用 !important 标记）    
+    -->
+    <div ng-show="2 + 2 == 5">
+        2 + 2 isn't 5, don't show
+    </div>
+    <div ng-show="2 + 2 == 4">
+        2 + 2 is 4, do show
+    </div>
+    <div ng-hide="2 + 2 == 5">
+        2 + 2 isn't 5, don't hide
+    </div>
+    <div ng-hide="2 + 2 == 4">
+        2 + 2 is 4, do hide
+    </div> 
+
+    <!--
+        ng-change 这个指令会在表单输入发生变化时计算给定表达式的值。因为要处理表单输入，这个指令要和  ngModel 联合起来使用    
+    -->
+    <div ng-controller="EquationController">
+        <input type="text" ng-model="equation.x" ng-change="change()" />
+        <code>{{ equation.output }}</code>
+    </div>
+
+
+    
+    
+    <div ng-controller='SomeController'>
+        {{ someModel.someValue }}
+        <button ng-click='SomeAction()'>parent --> child</button>
+        <div ng-controller='ChildController'>
+            {{ someModel.someValue }}
+            <button ng-click="ChildAction()">child --> parent</button>
+        </div>
+    </div>
+
+</body>
+</html>
+<script>
+    // ng-app 和 ng-controller 是特殊的指令，因为他们可以修改嵌套在他们内部的指令的作用域
+    // 内置指令 ng-controller 的作用是为嵌套在其中的指令创建一个子作用域，避免将所有操作和模型都定义在 $rootScope 上，用这个指令可以在一个 DOM 元素上放置控制器
+    // 建立的子作用域中的 $scope 只是一个 javascript 对象，其中包含从父级 $scope 中通过原型继承得到的方法和属性，包含应用的$rootScope. $scope 对象的职责是承载 DOM 中指令所共享的操作和模型。
+    // 这里的操作是指在 $scope 上的标准的 javascript 方法。模型指的是 $scope 上保存的包含瞬时状态数据的 javascript 对象
+    angular.module("myapp", []).run(function ($rootScope,$timeout) {//任何具有 ng-app 属性的 DOM 元素将被标记为 $rootScope 的起始点。$rootScope 是作用域链的起始点，任何嵌套在 ng-app 中的指令都会继承他。在 javascript 中通过 run 方法访问 $rootScope
+        $rootScope.rootValue = 'I really like you';
+        $rootScope.isDisabled = true;
+        $timeout(function () {
+            $rootScope.isDisabled = false; //textarea 会被禁用 5 秒，直到 isDisabled 设置为 false。
+            $rootScope.myhref = 'https://github.com/330556994'; //将插值生效时间延迟来观察实际情况
+            $rootScope.myImgSrc = 'https://ss3.bdstatic.com/iPoZeXSm1A5BphGlnYG/skin/14.jpg?2' //将图片路径生效时间延迟观察实际情况
+        },5000);
+    }).controller('SomeController', function ($scope) {
+		$scope.someModel={
+			someValue:'gongtao'
+		};
+		$scope.SomeAction = function(){
+			$scope.someModel.someValue='Hello gongtao'; //如果将模型对象中的某个属性设置为字符串，他会通过引用进行共享，因此在子$scope中修改属性也会修改父$scope 中的属性，
+		};
+	}).controller("ChildController",function($scope){
+		$scope.ChildAction = function(){
+			$scope.someModel.someValue='Hi gongtao';
+		}
+	}).controller("IncludeController", function ($scope) {
+	    $scope.includefilename = 'HtmlPage2.html';  //文件名，这里的文件名可以使用表达式返回
+	    $scope.isautoscroll = true; //使用 ng-include 包含的部分是否可以在指定的视图上滚动
+	    $scope.includeFun = function(){
+	        alert("这是使用 include 加载页面完成后执行的回调函数");
+	    }
+	}).controller("PeopleController", function ($scope) {
+	    $scope.people = [
+            {name:'龚涛',city:'安徽巢湖'},
+            {name:'马航',city:'四川简阳'}
+	    ];
+	}).controller("EquationController", function ($scope) {
+	    $scope.equation = {};
+	    $scope.change = function () {
+	        if ($scope.equation.x) 
+	        $scope.equation.output = parseInt($scope.equation.x)+100;
+	    }
+	});
+</script>
